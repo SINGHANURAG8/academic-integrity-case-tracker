@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Academic Integrity Case Tracker</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="login-page-body">
+    <div class="login-card-container">
+        <!-- Form Panel -->
+        <div class="login-panel-form">
+            <div class="login-header">
+                <h1>🏛️ Academic Integrity Case Tracker</h1>
+                <p>Sign in to your college staff account</p>
+            </div>
+
+            <!-- Flash alerts -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    <div class="flash-container">
+                        {% for category, message in messages %}
+                            <div class="alert alert-{{ category }}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                {% endif %}
+            {% endwith %}
+
+            <form action="{{ url_for('login') }}" method="POST">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username <span class="required">*</span></label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Enter username (e.g. officer)" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password <span class="required">*</span></label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="role" class="form-label">Role Verification (Optional)</label>
+                    <select id="role" name="role" class="form-control">
+                        <option value="">-- Any / Auto-detect role --</option>
+                        {% for r in roles %}
+                            <option value="{{ r }}">{{ r }}</option>
+                        {% endfor %}
+                    </select>
+                    <span class="form-hint">Backend verifies that the credentials match the chosen role.</span>
+                </div>
+
+                <div style="margin-top: 24px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 15px;">
+                        Sign In to Portal
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Demo Accounts Panel -->
+        <div class="login-panel-demo">
+            <h2 class="demo-title">Demo User Credentials</h2>
+            <p class="demo-desc">Use any of the following pre-configured college accounts for testing and viva demonstration:</p>
+
+            <div class="demo-account-list">
+                <div class="demo-account-item">
+                    <div class="demo-role-name">
+                        <span>Administrator</span>
+                        <span class="current-role-badge role-badge-admin">Admin</span>
+                    </div>
+                    <div><strong>User:</strong> <span class="demo-cred">admin</span></div>
+                    <div><strong>Password:</strong> <span class="demo-cred">admin123</span></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">User management & system audit logs</div>
+                </div>
+
+                <div class="demo-account-item">
+                    <div class="demo-role-name">
+                        <span>Integrity Officer</span>
+                        <span class="current-role-badge role-badge-officer">Officer</span>
+                    </div>
+                    <div><strong>User:</strong> <span class="demo-cred">officer</span></div>
+                    <div><strong>Password:</strong> <span class="demo-cred">officer123</span></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Case triage, investigator assignment & workflow</div>
+                </div>
+
+                <div class="demo-account-item">
+                    <div class="demo-role-name">
+                        <span>Investigator</span>
+                        <span class="current-role-badge role-badge-investigator">Investigator</span>
+                    </div>
+                    <div><strong>User:</strong> <span class="demo-cred">investigator</span></div>
+                    <div><strong>Password:</strong> <span class="demo-cred">invest123</span></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Investigate assigned cases & record findings</div>
+                </div>
+
+                <div class="demo-account-item">
+                    <div class="demo-role-name">
+                        <span>Faculty / Reporter</span>
+                        <span class="current-role-badge role-badge-faculty">Faculty</span>
+                    </div>
+                    <div><strong>User:</strong> <span class="demo-cred">faculty</span></div>
+                    <div><strong>Password:</strong> <span class="demo-cred">faculty123</span></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Submit incident reports & track their own reports</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

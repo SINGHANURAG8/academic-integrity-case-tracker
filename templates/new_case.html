@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Report Incident - Academic Integrity Case Tracker{% endblock %}
+{% block header_title %}Report Academic Integrity Incident{% endblock %}
+
+{% block content %}
+<div style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 20px;">
+        <a href="{{ url_for('cases_list') }}" class="btn btn-secondary btn-sm">&larr; Back to Case Registry</a>
+    </div>
+
+    <div class="card">
+        <div class="card-header">
+            <span class="card-title">Academic Incident Report Form</span>
+        </div>
+        <div class="card-body">
+            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
+                Please provide accurate details regarding the suspected academic integrity violation. This record will be registered under the initial status of <strong>Reported</strong> and queued for Integrity Office review.
+            </p>
+
+            <form action="{{ url_for('new_case') }}" method="POST">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="student_id" class="form-label">Student ID Number <span class="required">*</span></label>
+                        <input type="text" id="student_id" name="student_id" class="form-control" placeholder="e.g. STU-9821" required>
+                        <span class="form-hint">Official college student identification number.</span>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="student_name" class="form-label">Student Full Name <span class="required">*</span></label>
+                        <input type="text" id="student_name" name="student_name" class="form-control" placeholder="e.g. Jordan Rivera" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="course_name" class="form-label">Course Code & Title <span class="required">*</span></label>
+                        <input type="text" id="course_name" name="course_name" class="form-control" placeholder="e.g. CS101 Introduction to Computing" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="incident_date" class="form-label">Date of Incident</label>
+                        <input type="date" id="incident_date" name="incident_date" class="form-control">
+                        <span class="form-hint">Leave blank to use current date.</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="incident_type" class="form-label">Type of Academic Violation <span class="required">*</span></label>
+                    <select id="incident_type" name="incident_type" class="form-control" required>
+                        <option value="">-- Select Violation Category --</option>
+                        {% for itype in incident_types %}
+                            <option value="{{ itype }}">{{ itype }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="description" class="form-label">Detailed Description & Evidence Summary <span class="required">*</span></label>
+                    <textarea id="description" name="description" class="form-control" rows="5" placeholder="Describe the suspected misconduct, assignment or exam involved, physical or digital evidence, and initial observations..." required></textarea>
+                </div>
+
+                <div style="display: flex; gap: 12px; margin-top: 28px; justify-content: flex-end;">
+                    <a href="{{ url_for('cases_list') }}" class="btn btn-secondary">Cancel</a>
+                    <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">
+                        Submit Incident Report
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Academic Integrity Case Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="app-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-title">
+                    <span>🏛️ CaseTracker</span>
+                </div>
+                <span class="brand-badge">Academic Integrity</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Navigation</div>
+                <a href="{{ url_for('dashboard') }}" class="nav-link {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                    <span>📊</span> Dashboard
+                </a>
+                <a href="{{ url_for('cases_list') }}" class="nav-link {% if request.endpoint in ['cases_list', 'case_detail'] %}active{% endif %}">
+                    <span>📁</span> Case Records
+                </a>
+
+                {% if current_user and current_user.role in [ROLE_FACULTY, ROLE_OFFICER, ROLE_ADMIN] %}
+                <a href="{{ url_for('new_case') }}" class="nav-link {% if request.endpoint == 'new_case' %}active{% endif %}">
+                    <span>✍️</span> Report Incident
+                </a>
+                {% endif %}
+
+                {% if current_user and current_user.role in [ROLE_ADMIN, ROLE_OFFICER] %}
+                <div class="nav-section-title">Administration</div>
+                <a href="{{ url_for('audit_logs') }}" class="nav-link {% if request.endpoint == 'audit_logs' %}active{% endif %}">
+                    <span>📜</span> Audit Trail
+                </a>
+                {% endif %}
+
+                {% if current_user and current_user.role == ROLE_ADMIN %}
+                <a href="{{ url_for('manage_users') }}" class="nav-link {% if request.endpoint == 'manage_users' %}active{% endif %}">
+                    <span>👥</span> User Accounts
+                </a>
+                {% endif %}
+            </nav>
+
+            {% if current_user %}
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-info-text">
+                        <div class="user-name">{{ current_user.full_name }}</div>
+                        <span class="user-role-tag">{{ current_user.role }}</span>
+                    </div>
+                    <a href="{{ url_for('logout') }}" class="btn-logout" title="Sign out">Logout</a>
+                </div>
+            </div>
+            {% endif %}
+        </aside>
+
+        <!-- Main Workspace -->
+        <div class="main-wrapper">
+            <header class="top-header">
+                <div class="header-title-wrapper">
+                    <h1 class="page-main-heading">{% block header_title %}Academic Integrity Case Tracker{% endblock %}</h1>
+                </div>
+                {% if current_user %}
+                <div class="header-meta">
+                    <span class="current-role-badge 
+                        {% if current_user.role == ROLE_ADMIN %}role-badge-admin
+                        {% elif current_user.role == ROLE_OFFICER %}role-badge-officer
+                        {% elif current_user.role == ROLE_INVESTIGATOR %}role-badge-investigator
+                        {% elif current_user.role == ROLE_FACULTY %}role-badge-faculty{% endif %}">
+                        {{ current_user.role }}
+                    </span>
+                    <span style="font-size: 13px; color: var(--text-muted);">{{ current_user.username }}</span>
+                </div>
+                {% endif %}
+            </header>
+
+            <main class="content-body">
+                <!-- Flashed Messages -->
+                {% with messages = get_flashed_messages(with_categories=true) %}
+                    {% if messages %}
+                        <div class="flash-container">
+                            {% for category, message in messages %}
+                                <div class="alert alert-{{ category }}">
+                                    {{ message }}
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% block content %}{% endblock %}
+            </main>
+
+            <footer class="app-footer">
+                Academic Integrity Case Tracker &copy; {{ current_year }} &mdash; College Academic Management System Demo (Pure HTML + CSS + Python Flask, No JS)
+            </footer>
+        </div>
+    </div>
+</body>
+</html>

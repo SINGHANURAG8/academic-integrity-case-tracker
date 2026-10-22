@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - Academic Integrity Case Tracker{% endblock %}
+{% block header_title %}Operational Dashboard{% endblock %}
+
+{% block content %}
+<!-- Welcome & Quick Action Banner -->
+<div class="card" style="margin-bottom: 24px; background: linear-gradient(to right, #102a43, #1e3a5f); color: #ffffff;">
+    <div class="card-body" style="padding: 24px 28px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px;">
+        <div>
+            <h2 style="font-size: 20px; font-weight: 700; margin-bottom: 4px; color: #ffffff;">Welcome, {{ current_user.full_name }}!</h2>
+            <p style="font-size: 14px; color: #94a3b8;">
+                Role: <strong>{{ current_user.role }}</strong> &bull; 
+                {% if current_user.role == ROLE_FACULTY %}
+                    Showing incident reports filed by you.
+                {% elif current_user.role == ROLE_INVESTIGATOR %}
+                    Showing academic integrity cases assigned to you for investigation.
+                {% else %}
+                    Institutional overview of all academic integrity cases across departments.
+                {% endif %}
+            </p>
+        </div>
+
+        <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+            {% if current_user.role in [ROLE_FACULTY, ROLE_OFFICER, ROLE_ADMIN] %}
+            <a href="{{ url_for('new_case') }}" class="btn btn-accent" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                + Report New Incident
+            </a>
+            {% endif %}
+            <a href="{{ url_for('cases_list') }}" class="btn btn-secondary">
+                View All Cases
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Stat Cards -->
+<div class="stats-grid">
+    <div class="stat-card stat-card-total">
+        <div class="stat-header">Total Cases</div>
+        <div class="stat-value">{{ total_cases }}</div>
+        <div class="stat-subtext">
+            {% if current_user.role == ROLE_FACULTY %}Your submitted reports
+            {% elif current_user.role == ROLE_INVESTIGATOR %}Assigned to you
+            {% else %}All institutional cases{% endif %}
+        </div>
+    </div>
+
+    <div class="stat-card stat-card-open">
+        <div class="stat-header">Open / Under Review</div>
+        <div class="stat-value">{{ open_cases }}</div>
+        <div class="stat-subtext">Awaiting initial officer review or assignment</div>
+    </div>
+
+    <div class="stat-card stat-card-investigation">
+        <div class="stat-header">Active Investigations</div>
+        <div class="stat-value">{{ investigation_cases }}</div>
+        <div class="stat-subtext">Evidence analysis & committee hearings</div>
+    </div>
+
+    <div class="stat-card stat-card-resolved">
+        <div class="stat-header">Resolved / Closed</div>
+        <div class="stat-value">{{ resolved_cases }}</div>
+        <div class="stat-subtext">Cases with final decisions completed</div>
+    </div>
+</div>
+
+<!-- Recent Cases Table -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">Recently Reported Cases</span>
+        <a href="{{ url_for('cases_list') }}" class="btn btn-sm btn-secondary">View Case Registry &rarr;</a>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if recent_cases %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Case ID</th>
+                        <th>Student</th>
+                        <th>Course</th>
+                        <th>Incident Type</th>
+                        <th>Date Reported</th>
+                        <th>Investigator</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in recent_cases %}
+                    <tr>
+                        <td><strong>{{ c.case_number }}</strong></td>
+                        <td>
+                            <div>{{ c.student_name }}</div>
+                            <span style="font-size: 11px; color: var(--text-muted);">{{ c.student_id }}</span>
+                        </td>
+                        <td>{{ c.course_name }}</td>
+                        <td><span class="type-tag">{{ c.incident_type }}</span></td>
+                        <td>{{ c.date_reported[:10] }}</td>
+                        <td>
+                            {% if c.investigator_name %}
+                                {{ c.investigator_name }}
+                            {% else %}
+                                <span style="color: var(--text-muted); font-style: italic;">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-pill status-{{ c.status.lower().replace(' ', '-') }}">
+                                {{ c.status }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="{{ url_for('case_detail', case_id=c.id) }}" class="btn btn-sm btn-primary">
+                                View Details
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding: 40px; text-align: center; color: var(--text-muted);">
+            <p>No recent cases found in your view.</p>
+            {% if current_user.role in [ROLE_FACULTY, ROLE_OFFICER, ROLE_ADMIN] %}
+            <p style="margin-top: 10px;">
+                <a href="{{ url_for('new_case') }}" class="btn btn-accent btn-sm">Report First Incident</a>
+            </p>
+            {% endif %}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

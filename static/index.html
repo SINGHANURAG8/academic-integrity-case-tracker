@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FindIt - AI-Powered Campus Lost & Found | LPU CODE FLUX</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Top Global Announcement & Hackathon Header -->
+  <div class="top-banner">
+    <div class="banner-inner container">
+      <div class="banner-badge">🏆 CODE FLUX Hackathon MVP</div>
+      <div class="banner-text">
+        <strong>Lovely Professional University</strong> • Campus Life & Student Experience Track
+      </div>
+      <div class="banner-status">
+        <span class="pulse-dot"></span> Visual Matching Engine: <strong>Active</strong>
+      </div>
+    </div>
+  </div>
+
+  <!-- Header Navigation -->
+  <header class="main-header">
+    <div class="container header-container">
+      <div class="brand" onclick="switchTab('catalog')">
+        <div class="brand-icon">
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            <path d="M11 8v6"></path>
+            <path d="M8 11h6"></path>
+          </svg>
+        </div>
+        <div class="brand-text">
+          <div class="brand-title">Find<span>It</span> <span class="brand-sub">LPU</span></div>
+          <div class="brand-tagline">Visual Similarity Matcher</div>
+        </div>
+      </div>
+
+      <nav class="nav-links">
+        <button class="nav-btn active" id="tab-btn-catalog" onclick="switchTab('catalog')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></svg>
+          Browse Feed
+        </button>
+        <button class="nav-btn" id="tab-btn-analytics" onclick="switchTab('analytics')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"/><path d="M22 12A10 10 0 0 0 12 2v10z"/></svg>
+          Campus Heatmap
+        </button>
+        <button class="nav-btn" id="tab-btn-admin" onclick="switchTab('admin')">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Security Desk
+        </button>
+      </nav>
+
+      <div class="header-actions">
+        <button class="btn btn-secondary demo-trigger-btn" onclick="toggleDemoBar()">
+          <span class="sparkle">⚡</span> Judge Demo Presets
+        </button>
+        <button class="btn btn-primary" onclick="openReportModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          Report Item
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Interactive Judge Demo Showcase Bar -->
+  <section class="demo-bar" id="demo-bar">
+    <div class="container demo-bar-inner">
+      <div class="demo-bar-info">
+        <div class="demo-bar-title">
+          <span class="live-pill">LIVE STAGE DEMO</span>
+          <strong>1-Click Pitch Scenarios for Judges</strong>
+        </div>
+        <p class="demo-bar-subtitle">
+          Simulate a student reporting a lost item on stage and watch FindIt surface the pre-seeded found item in seconds using visual cosine similarity!
+        </p>
+      </div>
+      <div class="demo-presets-grid" id="demo-presets-container">
+        <!-- Injected via JavaScript -->
+      </div>
+      <div class="demo-bar-actions">
+        <button class="btn btn-sm btn-outline" onclick="resetDatabaseSeed()">
+          🔄 Reset Database & Seed
+        </button>
+        <button class="btn btn-sm btn-ghost" onclick="toggleDemoBar()">Close Demo Bar ✕</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Hero Stats -->
+  <section class="stats-ribbon">
+    <div class="container stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon lost-icon">🔍</div>
+        <div>
+          <div class="stat-val" id="stat-lost-count">--</div>
+          <div class="stat-label">Lost Items Reported</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon found-icon">📦</div>
+        <div>
+          <div class="stat-val" id="stat-found-count">--</div>
+          <div class="stat-label">Found Items Turned In</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon match-icon">⚡</div>
+        <div>
+          <div class="stat-val" id="stat-resolved-count">--</div>
+          <div class="stat-label">Verified Reunions</div>
+        </div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon speed-icon">⏱️</div>
+        <div>
+          <div class="stat-val" id="stat-recovery-rate">94%</div>
+          <div class="stat-label">Match Accuracy Rate</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 1: BROWSE CATALOG VIEW -->
+  <main class="container tab-content active" id="view-catalog">
+    <!-- Filter & Search Toolbar -->
+    <div class="filter-toolbar">
+      <div class="search-box">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="filter-search" placeholder="Search title, description, brand, specific classroom..." oninput="onFilterChange()">
+      </div>
+
+      <div class="filter-controls">
+        <div class="pill-group" id="filter-type-group">
+          <button class="pill active" data-type="all" onclick="setTypeFilter('all')">All Posts</button>
+          <button class="pill pill-lost" data-type="lost" onclick="setTypeFilter('lost')">🔍 Lost</button>
+          <button class="pill pill-found" data-type="found" onclick="setTypeFilter('found')">📦 Found</button>
+        </div>
+
+        <select id="filter-location" class="select-dropdown" onchange="onFilterChange()">
+          <option value="all">📍 All Campus Locations</option>
+          <option value="Central Library">Central Library</option>
+          <option value="UniMall">UniMall</option>
+          <option value="Block 34 (School of CS)">Block 34 (School of CS)</option>
+          <option value="Block 36 (School of Mechanical)">Block 36 (School of Mechanical)</option>
+          <option value="Block 38">Block 38</option>
+          <option value="Central Mess">Central Mess</option>
+          <option value="Indoor Sports Complex">Indoor Sports Complex</option>
+          <option value="BH-4 Boys Hostel">BH-4 Boys Hostel</option>
+          <option value="Main Security Gate 1">Main Security Gate 1</option>
+        </select>
+
+        <select id="filter-category" class="select-dropdown" onchange="onFilterChange()">
+          <option value="all">🏷️ All Categories</option>
+          <option value="ID Cards & Documents">ID Cards & Documents</option>
+          <option value="Audio & Earbuds">Audio & Earbuds</option>
+          <option value="Electronics & Chargers">Electronics & Chargers</option>
+          <option value="Bottles & Containers">Bottles & Containers</option>
+          <option value="Keys & Wallets">Keys & Wallets</option>
+          <option value="Bags & Accessories">Bags & Accessories</option>
+          <option value="Books & Stationery">Books & Stationery</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Items Grid Header -->
+    <div class="grid-header">
+      <div class="grid-count" id="grid-count-text">Loading campus items...</div>
+      <div class="grid-tip">💡 Tip: Click <strong>"Check Auto-Matches"</strong> on any item to view AI similarity analysis</div>
+    </div>
+
+    <!-- Item Cards Container -->
+    <div class="items-grid" id="items-grid">
+      <!-- Injected via JavaScript -->
+    </div>
+  </main>
+
+  <!-- TAB 2: CAMPUS HEATMAP & LOSS ANALYTICS VIEW -->
+  <section class="container tab-content" id="view-analytics">
+    <div class="analytics-header">
+      <h2>LPU Campus Loss Hotspots & Intelligence</h2>
+      <p>Data-driven spatial breakdown of where items are misplaced and recovered across Lovely Professional University.</p>
+    </div>
+
+    <div class="heatmap-layout">
+      <!-- Interactive Campus Map Representation -->
+      <div class="campus-map-card">
+        <div class="map-card-header">
+          <h3>Interactive Campus Zones</h3>
+          <span class="badge-live">Live Heat Index</span>
+        </div>
+        <div class="campus-map-visual">
+          <div class="campus-zone zone-high" style="top: 25%; left: 35%;" onclick="filterByHeatmap('Central Library')">
+            <span class="pin-pulse"></span>
+            <strong>Central Library</strong>
+            <small>High Density • ID Cards & Books</small>
+          </div>
+          <div class="campus-zone zone-high" style="top: 55%; left: 65%;" onclick="filterByHeatmap('UniMall')">
+            <span class="pin-pulse"></span>
+            <strong>UniMall</strong>
+            <small>High Density • Earbuds & Tech</small>
+          </div>
+          <div class="campus-zone zone-med" style="top: 22%; left: 70%;" onclick="filterByHeatmap('Block 34 (School of CS)')">
+            <span class="pin-pulse"></span>
+            <strong>Block 34 (CSE)</strong>
+            <small>Chargers & Cables</small>
+          </div>
+          <div class="campus-zone zone-med" style="top: 70%; left: 30%;" onclick="filterByHeatmap('Indoor Sports Complex')">
+            <span class="pin-pulse"></span>
+            <strong>Sports Complex</strong>
+            <small>Bottles, Watches & Gear</small>
+          </div>
+          <div class="campus-zone zone-med" style="top: 48%; left: 22%;" onclick="filterByHeatmap('Central Mess')">
+            <span class="pin-pulse"></span>
+            <strong>Central Mess</strong>
+            <small>Wallets & Keys</small>
+          </div>
+          <div class="campus-zone zone-low" style="top: 80%; left: 68%;" onclick="filterByHeatmap('BH-4 Boys Hostel')">
+            <span class="pin-pulse"></span>
+            <strong>Hostel Clusters</strong>
+            <small>Keys & Lanyards</small>
+          </div>
+          <div class="campus-zone zone-low" style="top: 10%; left: 18%;" onclick="filterByHeatmap('Main Security Gate 1')">
+            <span class="pin-pulse"></span>
+            <strong>Gate 1 Central Security</strong>
+            <small>Main Turn-in Desk</small>
+          </div>
+        </div>
+        <div class="map-legend">
+          <span><span class="legend-dot high"></span> High Misplacement Zone (Library, UniMall)</span>
+          <span><span class="legend-dot med"></span> Moderate Zone (CS Labs, Gym)</span>
+          <span><span class="legend-dot low"></span> Safe Transit & Handover Hubs</span>
+        </div>
+      </div>
+
+      <!-- Hotspots Ranking & Category Stats -->
+      <div class="analytics-sidebar">
+        <div class="hotspot-rank-card">
+          <h3>Top Misplacement Locations</h3>
+          <div class="rank-list" id="hotspots-rank-list">
+            <!-- Dynamic list -->
+          </div>
+        </div>
+
+        <div class="category-breakdown-card">
+          <h3>Most Lost Item Categories</h3>
+          <div class="category-bars" id="categories-bar-list">
+            <!-- Dynamic bars -->
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TAB 3: CAMPUS SECURITY DESK ADMIN VIEW -->
+  <section class="container tab-content" id="view-admin">
+    <div class="admin-header">
+      <div>
+        <h2>Campus Security & Lost-and-Found Desk Portal</h2>
+        <p>Official registry for LPU Security Officers and Helpdesk Staff to audit matches, issue claim receipts, and manage unclaimed items.</p>
+      </div>
+      <button class="btn btn-outline" onclick="exportRegistryCSV()">
+        📥 Export Custody Log (.CSV)
+      </button>
+    </div>
+
+    <div class="admin-desk-grid">
+      <div class="admin-card">
+        <h3>Unclaimed Physical Inventory</h3>
+        <p class="admin-subtext">Items handed into campus security desks awaiting verified owner retrieval.</p>
+        <div class="table-wrapper">
+          <table class="admin-table" id="admin-inventory-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Item Details</th>
+                <th>Turned In By</th>
+                <th>Location Found</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="admin-inventory-body">
+              <!-- Dynamic rows -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MODAL 1: REPORT LOST / FOUND ITEM -->
+  <div class="modal-backdrop" id="report-modal">
+    <div class="modal-dialog">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <h3 id="report-modal-title">Report an Item</h3>
+          <p>Provide a photo and details. FindIt will visually match it across LPU campus instantly.</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeReportModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <form id="report-form" onsubmit="handleReportSubmit(event)">
+          <!-- Toggle Lost vs Found -->
+          <div class="type-toggle-container">
+            <button type="button" class="type-toggle-btn active" id="btn-type-lost" onclick="setReportType('lost')">
+              <span class="icon">🔍</span> I Lost Something
+            </button>
+            <button type="button" class="type-toggle-btn" id="btn-type-found" onclick="setReportType('found')">
+              <span class="icon">📦</span> I Found Something
+            </button>
+          </div>
+
+          <!-- Photo Upload & Visual Scan Area -->
+          <div class="form-group">
+            <label class="form-label">Item Photo <span class="required">* (Visual Match Key)</span></label>
+            <div class="upload-dropzone" id="dropzone" onclick="document.getElementById('file-input').click()">
+              <input type="file" id="file-input" accept="image/*" style="display:none" onchange="handleFileSelect(event)">
+              <div id="dropzone-empty" class="dropzone-empty">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect width="18" height="18" x="3" y="3" rx="2" ry="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>
+                <div class="drop-text">Click to upload photo or drag & drop</div>
+                <div class="drop-subtext">JPG, PNG, WebP up to 10MB</div>
+              </div>
+              <div id="dropzone-preview" class="dropzone-preview" style="display:none">
+                <img id="preview-img" src="" alt="Preview">
+                <div class="preview-overlay">
+                  <span>Change Photo</span>
+                </div>
+              </div>
+            </div>
+            
+            <!-- Quick Preset Sample Picker for Fast Demo -->
+            <div class="preset-photo-pills">
+              <span class="preset-label">Or pick sample:</span>
+              <button type="button" class="pill-mini" onclick="selectSamplePreset('id')">🪪 Student ID Card</button>
+              <button type="button" class="pill-mini" onclick="selectSamplePreset('airpods')">🎧 AirPods Case</button>
+              <button type="button" class="pill-mini" onclick="selectSamplePreset('charger')">🔌 Dell Charger</button>
+              <button type="button" class="pill-mini" onclick="selectSamplePreset('bottle')">🧴 Milton Bottle</button>
+            </div>
+
+            <!-- Instant Pre-Scan Match Alert (shown right after image upload!) -->
+            <div class="instant-match-alert" id="instant-match-alert" style="display:none">
+              <div class="alert-icon">⚡</div>
+              <div class="alert-content">
+                <strong>Instant Match Detected!</strong>
+                <span id="instant-match-text">We spotted a potential match with high visual similarity!</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-dark" onclick="viewInstantMatch()">View Match</button>
+            </div>
+          </div>
+
+          <!-- Basic Info -->
+          <div class="form-row">
+            <div class="form-group flex-2">
+              <label class="form-label">Item Title <span class="required">*</span></label>
+              <input type="text" id="report-title" required placeholder="e.g. LPU Smart ID Card with orange lanyard">
+            </div>
+            <div class="form-group flex-1">
+              <label class="form-label">Category <span class="required">*</span></label>
+              <select id="report-category" required>
+                <option value="">Select category...</option>
+                <option value="ID Cards & Documents">ID Cards & Documents</option>
+                <option value="Audio & Earbuds">Audio & Earbuds</option>
+                <option value="Electronics & Chargers">Electronics & Chargers</option>
+                <option value="Bottles & Containers">Bottles & Containers</option>
+                <option value="Keys & Wallets">Keys & Wallets</option>
+                <option value="Bags & Accessories">Bags & Accessories</option>
+                <option value="Books & Stationery">Books & Stationery</option>
+                <option value="Others">Others</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Location Info -->
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label class="form-label">Campus Location <span class="required">*</span></label>
+              <select id="report-location" required>
+                <option value="">Select campus building / zone...</option>
+                <option value="Central Library">Central Library</option>
+                <option value="UniMall">UniMall</option>
+                <option value="Block 34 (School of CS)">Block 34 (School of CS)</option>
+                <option value="Block 36 (School of Mechanical)">Block 36 (School of Mechanical)</option>
+                <option value="Block 38">Block 38</option>
+                <option value="Central Mess">Central Mess</option>
+                <option value="Indoor Sports Complex">Indoor Sports Complex</option>
+                <option value="BH-4 Boys Hostel">BH-4 Boys Hostel</option>
+                <option value="Main Security Gate 1">Main Security Gate 1</option>
+                <option value="Campus General">Campus General / Other</option>
+              </select>
+            </div>
+            <div class="form-group flex-1">
+              <label class="form-label">Specific Landmark / Classroom</label>
+              <input type="text" id="report-spot" placeholder="e.g. Turnstiles, Room 304, Food Court table">
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Description & Distinctive Marks</label>
+            <textarea id="report-desc" rows="2" placeholder="Describe scratches, stickers, color tone, or identifiable features..."></textarea>
+          </div>
+
+          <!-- Contact Details -->
+          <div class="form-section-title">Your Contact Details (Revealed Only on Confirmed Match)</div>
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label class="form-label">Your Name <span class="required">*</span></label>
+              <input type="text" id="report-name" required placeholder="Aryan Sharma">
+            </div>
+            <div class="form-group flex-1">
+              <label class="form-label">WhatsApp / Phone Number <span class="required">*</span></label>
+              <input type="text" id="report-contact" required placeholder="+91 98123 45678">
+            </div>
+            <div class="form-group flex-1">
+              <label class="form-label">LPU Reg No. (Optional)</label>
+              <input type="text" id="report-regno" placeholder="12108421">
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline" onclick="closeReportModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" id="btn-submit-report">
+              <span>🚀 Submit & Match Now</span>
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 2: SIDE-BY-SIDE MATCH REVIEW MODAL -->
+  <div class="modal-backdrop" id="match-modal">
+    <div class="modal-dialog modal-lg">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="match-badge-header">
+            <span class="match-score-pill" id="match-top-pill">99% MATCH CONFIDENCE</span>
+            <span class="engine-badge">AI Visual Cosine Similarity</span>
+          </div>
+          <h3>Side-by-Side Match Review</h3>
+          <p>Review the visual features and campus details to confirm whether this is your item.</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeMatchModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="side-by-side-grid">
+          <!-- Left: Current / Query Item -->
+          <div class="match-column" id="query-item-col">
+            <div class="column-header">
+              <span class="tag-pill tag-lost" id="query-type-tag">YOUR POSTED ITEM</span>
+            </div>
+            <div class="match-img-wrap">
+              <img id="query-match-img" src="" alt="Query Item">
+            </div>
+            <div class="match-details">
+              <h4 id="query-match-title">--</h4>
+              <div class="detail-row">
+                <span class="lbl">Category:</span>
+                <span class="val" id="query-match-category">--</span>
+              </div>
+              <div class="detail-row">
+                <span class="lbl">Location:</span>
+                <span class="val" id="query-match-location">--</span>
+              </div>
+              <div class="detail-row">
+                <span class="lbl">Specific Spot:</span>
+                <span class="val" id="query-match-spot">--</span>
+              </div>
+              <p class="match-desc" id="query-match-desc">--</p>
+            </div>
+          </div>
+
+          <!-- Middle: Match Indicator Meter -->
+          <div class="match-vs-divider">
+            <div class="vs-circle">VS</div>
+            <div class="match-meter-box">
+              <div class="meter-percentage" id="meter-percent-val">99%</div>
+              <div class="meter-label">Visual Match</div>
+              <div class="meter-bar-outer">
+                <div class="meter-bar-inner" id="meter-bar-fill" style="width: 99%"></div>
+              </div>
+            </div>
+            <div class="match-reason-tags" id="match-reasons-list">
+              <!-- Injected reasons -->
+            </div>
+          </div>
+
+          <!-- Right: Candidate Matched Item -->
+          <div class="match-column" id="cand-item-col">
+            <div class="column-header">
+              <span class="tag-pill tag-found" id="cand-type-tag">FOUND ITEM IN DATABASE</span>
+            </div>
+            <div class="match-img-wrap">
+              <img id="cand-match-img" src="" alt="Candidate Item">
+            </div>
+            <div class="match-details">
+              <h4 id="cand-match-title">--</h4>
+              <div class="detail-row">
+                <span class="lbl">Category:</span>
+                <span class="val" id="cand-match-category">--</span>
+              </div>
+              <div class="detail-row">
+                <span class="lbl">Location:</span>
+                <span class="val" id="cand-match-location">--</span>
+              </div>
+              <div class="detail-row">
+                <span class="lbl">Specific Spot:</span>
+                <span class="val" id="cand-match-spot">--</span>
+              </div>
+              <p class="match-desc" id="cand-match-desc">--</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Other Alternative Candidate Matches (if any) -->
+        <div class="other-matches-section" id="other-matches-container" style="display:none">
+          <h5>Other Potential Matches:</h5>
+          <div class="other-matches-row" id="other-matches-list">
+            <!-- Alternative cards -->
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer match-footer">
+        <button class="btn btn-outline" onclick="closeMatchModal()">Not This One</button>
+        <button class="btn btn-success btn-lg" id="btn-confirm-match" onclick="executeConfirmMatch()">
+          ✅ "This is It!" - Confirm Match & Reveal Contact
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL 3: CONTACT REVEAL & SAFE DROPOFF HANDOFF -->
+  <div class="modal-backdrop" id="contact-modal">
+    <div class="modal-dialog modal-md">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="success-check-icon">🎉</div>
+          <h3>Match Verified & Confirmed!</h3>
+          <p>Both parties have verified ownership. Coordinate handoff below.</p>
+        </div>
+        <button class="modal-close-btn" onclick="closeContactModal()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Official Claim Token Box -->
+        <div class="claim-token-box">
+          <div class="token-lbl">Official Campus Claim Token</div>
+          <div class="token-val" id="claim-token-text">FINDIT-LPU-2026-XXXX</div>
+          <div class="token-sub">Present this token to campus security or the finder when meeting.</div>
+        </div>
+
+        <!-- Contact Cards -->
+        <div class="contact-party-card">
+          <div class="contact-header">
+            <div class="contact-avatar">👤</div>
+            <div>
+              <div class="contact-name" id="contact-person-name">Aryan Sharma</div>
+              <div class="contact-role" id="contact-person-role">Item Holder / Finder</div>
+            </div>
+          </div>
+
+          <div class="contact-action-buttons">
+            <a href="#" class="btn btn-whatsapp" id="btn-whatsapp-link" target="_blank">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+              <span>Chat on WhatsApp</span>
+            </a>
+            <a href="#" class="btn btn-outline" id="btn-call-link">
+              📞 Direct Call
+            </a>
+          </div>
+        </div>
+
+        <!-- Campus Safe Meetup Zone Suggestion -->
+        <div class="safe-spot-box">
+          <div class="safe-spot-icon">🛡️</div>
+          <div class="safe-spot-text">
+            <strong>Recommended Campus Safe-Handoff Point</strong>
+            <p>For your security, arrange the physical item handoff at <strong>Central Library Reception</strong> or <strong>Gate 1 Main Security Desk</strong>.</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-primary" onclick="markCaseResolved()">
+          🎉 Item Reunited (Close Case)
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Global Toast Notification -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Scripts -->
+  <script src="app.js"></script>
+</body>
+</html>

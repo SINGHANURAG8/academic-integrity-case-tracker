@@ -1,0 +1,261 @@
+{% extends "base.html" %}
+
+{% block title %}Case {{ case.case_number }} - Academic Integrity Case Tracker{% endblock %}
+{% block header_title %}Case Details &mdash; {{ case.case_number }}{% endblock %}
+
+{% block content %}
+<!-- Back link & Header banner -->
+<div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+    <a href="{{ url_for('cases_list') }}" class="btn btn-secondary btn-sm">&larr; Back to Case Registry</a>
+    <div style="display: flex; gap: 8px; align-items: center;">
+        <span style="font-size: 13px; color: var(--text-muted);">Current Status:</span>
+        <span class="status-pill status-{{ case.status.lower().replace(' ', '-') }}" style="font-size: 13px; padding: 6px 14px;">
+            {{ case.status }}
+        </span>
+    </div>
+</div>
+
+<!-- Workflow Progress Stepper (Pure CSS - Zero JS) -->
+{% set step_names = ['Reported', 'Under Review', 'Investigation', 'Decision Pending', 'Resolved', 'Closed'] %}
+{% set current_idx = step_names.index(case.status) if case.status in step_names else 0 %}
+
+<div class="workflow-progress">
+    {% for step in step_names %}
+    {% set s_idx = loop.index0 %}
+    <div class="workflow-step {% if s_idx < current_idx %}completed{% elif s_idx == current_idx %}active{% endif %}">
+        <div class="step-marker">
+            {% if s_idx < current_idx %}✓{% else %}{{ loop.index }}{% endif %}
+        </div>
+        <div class="step-title">{{ step }}</div>
+    </div>
+    {% endfor %}
+</div>
+
+<!-- Main Grid Layout -->
+<div class="case-detail-grid">
+    <!-- Left Column: Primary Case Record & Investigation Notes -->
+    <div>
+        <!-- Student & Incident Overview Card -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Incident Information</span>
+                <span class="type-tag">{{ case.incident_type }}</span>
+            </div>
+            <div class="card-body">
+                <div class="form-row">
+                    <div>
+                        <div class="info-label">Case Identifier</div>
+                        <div class="info-value" style="font-weight: 700; color: var(--primary-navy);">{{ case.case_number }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Student ID & Name</div>
+                        <div class="info-value">
+                            <strong>{{ case.student_name }}</strong> 
+                            <span style="color: var(--text-muted); font-size: 13px;">({{ case.student_id }})</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div>
+                        <div class="info-label">Course Name</div>
+                        <div class="info-value">{{ case.course_name }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Date of Incident</div>
+                        <div class="info-value">{{ case.incident_date }}</div>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div>
+                        <div class="info-label">Date Reported</div>
+                        <div class="info-value">{{ case.date_reported }}</div>
+                    </div>
+                    <div>
+                        <div class="info-label">Reporting Staff Member</div>
+                        <div class="info-value">{{ case.reporter_name }} ({{ case.reporter_role }})</div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 10px;">
+                    <div class="info-label">Incident Description</div>
+                    <div class="notes-block" style="background-color: #ffffff; border: 1px solid var(--border-color); color: var(--text-primary);">{{ case.description }}</div>
+                </div>
+
+                {% if case.resolution %}
+                <div style="margin-top: 20px; padding: 16px; background-color: var(--success-bg); border: 1px solid #86efac; border-radius: var(--radius-md);">
+                    <div class="info-label" style="color: var(--success);">Official Committee Resolution / Decision</div>
+                    <div style="font-size: 14px; color: var(--text-primary); margin-top: 4px; white-space: pre-wrap;">{{ case.resolution }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Investigation Notes Section -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Investigation Findings & Interview Notes</span>
+            </div>
+            <div class="card-body">
+                {% if case.investigation_notes %}
+                <div class="notes-block">
+{{ case.investigation_notes }}
+                </div>
+                {% else %}
+                <p style="font-size: 13px; color: var(--text-muted); font-style: italic; margin-bottom: 16px;">
+                    No investigation notes or hearing summaries recorded yet.
+                </p>
+                {% endif %}
+
+                <!-- Add Note Form (Allowed for Officer, Admin, Assigned Investigator) -->
+                {% if (current_user.role in [ROLE_OFFICER, ROLE_ADMIN]) or (current_user.role == ROLE_INVESTIGATOR and case.assigned_investigator_id == current_user.id) %}
+                <form action="{{ url_for('add_case_notes', case_id=case.id) }}" method="POST" style="margin-top: 20px;">
+                    <div class="form-group">
+                        <label for="notes" class="form-label">Add Note / Evidence Finding</label>
+                        <textarea id="notes" name="notes" class="form-control" rows="3" placeholder="Record interview notes, student statements, or evidence analysis..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-secondary btn-sm">
+                        Append Note to Record
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Case Audit History -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Case Activity Log</span>
+            </div>
+            <div class="card-body" style="padding: 0;">
+                {% if case_logs %}
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Action</th>
+                            <th>Details</th>
+                            <th>User</th>
+                            <th>Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for log in case_logs %}
+                        <tr>
+                            <td><strong>{{ log.action }}</strong></td>
+                            <td style="font-size: 13px;">{{ log.details }}</td>
+                            <td>
+                                <div>{{ log.username }}</div>
+                                <span style="font-size: 11px; color: var(--text-muted);">{{ log.role }}</span>
+                            </td>
+                            <td style="font-size: 12px; color: var(--text-muted); white-space: nowrap;">{{ log.timestamp }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% else %}
+                <p style="padding: 20px; font-size: 13px; color: var(--text-muted);">No activity records for this case.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Case Controls & Actions -->
+    <div>
+        <!-- Investigator Assignment Card -->
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Assigned Investigator</span>
+            </div>
+            <div class="card-body">
+                <div style="margin-bottom: 16px;">
+                    {% if case.investigator_name %}
+                        <div style="font-size: 16px; font-weight: 700; color: var(--primary-navy);">
+                            {{ case.investigator_name }}
+                        </div>
+                        <div style="font-size: 13px; color: var(--text-muted);">{{ case.investigator_email }}</div>
+                    {% else %}
+                        <div style="font-size: 14px; color: var(--warning); font-weight: 600;">
+                            ⚠️ No Investigator Assigned Yet
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- Assignment Form for Integrity Officer & Admin -->
+                {% if current_user.role in [ROLE_OFFICER, ROLE_ADMIN] %}
+                <hr style="border: none; border-top: 1px solid var(--border-color); margin: 16px 0;">
+                <form action="{{ url_for('assign_investigator', case_id=case.id) }}" method="POST">
+                    <div class="form-group">
+                        <label for="investigator_id" class="form-label">
+                            {% if case.investigator_name %}Reassign Investigator{% else %}Assign Investigator{% endif %}
+                        </label>
+                        <select id="investigator_id" name="investigator_id" class="form-control">
+                            <option value="">-- Remove / Unassigned --</option>
+                            {% for inv in investigators %}
+                                <option value="{{ inv.id }}" {% if case.assigned_investigator_id == inv.id %}selected{% endif %}>
+                                    {{ inv.full_name }} ({{ inv.email }})
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm" style="width: 100%;">
+                        Save Assignment
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Workflow Status Update Card -->
+        {% if (current_user.role in [ROLE_OFFICER, ROLE_ADMIN]) or (current_user.role == ROLE_INVESTIGATOR and case.assigned_investigator_id == current_user.id) %}
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Update Workflow Status</span>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('update_case_status', case_id=case.id) }}" method="POST">
+                    <div class="form-group">
+                        <label for="status" class="form-label">New Status <span class="required">*</span></label>
+                        <select id="status" name="status" class="form-control" required>
+                            {% for st in statuses %}
+                                <option value="{{ st }}" {% if case.status == st %}selected{% endif %}>
+                                    {{ st }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="status_note" class="form-label">Status Change Note</label>
+                        <input type="text" id="status_note" name="status_note" class="form-control" placeholder="Reason for transition...">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="resolution" class="form-label">Final Resolution / Decision</label>
+                        <textarea id="resolution" name="resolution" class="form-control" rows="2" placeholder="Required if moving to Resolved or Closed...">{{ case.resolution or '' }}</textarea>
+                        <span class="form-hint">Enter sanctions, reprimands, or educational outcomes.</span>
+                    </div>
+
+                    <button type="submit" class="btn btn-accent" style="width: 100%;">
+                        Update Case Status
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Workflow Access</span>
+            </div>
+            <div class="card-body" style="font-size: 13px; color: var(--text-muted);">
+                {% if current_user.role == ROLE_FACULTY %}
+                    Faculty reporters can view the progress of their submitted cases. Status updates and investigator assignments are managed by Integrity Officers.
+                {% elif current_user.role == ROLE_INVESTIGATOR %}
+                    This case is not currently assigned to you. Only the assigned investigator or an integrity officer can update its status.
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

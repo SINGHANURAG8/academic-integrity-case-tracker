@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+
+{% block title %}Case Registry - Academic Integrity Case Tracker{% endblock %}
+{% block header_title %}Academic Integrity Cases{% endblock %}
+
+{% block content %}
+<!-- Search & Filter Bar (HTML GET Form - Zero JS) -->
+<div class="filter-toolbar">
+    <form action="{{ url_for('cases_list') }}" method="GET" class="filter-form">
+        <div class="search-input-wrapper">
+            <input type="text" name="search" class="form-control" placeholder="Search by Case ID, Student ID, Course, or Incident Type..." value="{{ search_query }}">
+        </div>
+
+        <div class="filter-select-wrapper">
+            <select name="status" class="form-control">
+                {% for st in statuses %}
+                    <option value="{{ st }}" {% if status_filter == st %}selected{% endif %}>
+                        {% if st == 'All' %}Status: All Cases{% else %}Status: {{ st }}{% endif %}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">
+            Filter Cases
+        </button>
+
+        {% if search_query or status_filter %}
+        <a href="{{ url_for('cases_list') }}" class="btn btn-secondary">
+            Reset
+        </a>
+        {% endif %}
+
+        {% if current_user.role in [ROLE_FACULTY, ROLE_OFFICER, ROLE_ADMIN] %}
+        <div style="margin-left: auto;">
+            <a href="{{ url_for('new_case') }}" class="btn btn-accent">
+                + Report Incident
+            </a>
+        </div>
+        {% endif %}
+    </form>
+</div>
+
+<!-- Cases Table Card -->
+<div class="card">
+    <div class="card-header">
+        <span class="card-title">
+            Case Records 
+            <span style="font-size: 13px; font-weight: normal; color: var(--text-muted);">
+                ({{ cases|length }} record{% if cases|length != 1 %}s{% endif %} found)
+            </span>
+        </span>
+    </div>
+    <div class="card-body" style="padding: 0;">
+        {% if cases %}
+        <div class="table-responsive">
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>Case ID</th>
+                        <th>Student Information</th>
+                        <th>Course</th>
+                        <th>Incident Type</th>
+                        <th>Reported On</th>
+                        <th>Reported By</th>
+                        <th>Investigator</th>
+                        <th>Status</th>
+                        <th style="text-align: right;">Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for c in cases %}
+                    <tr>
+                        <td>
+                            <strong style="color: var(--primary-navy);">{{ c.case_number }}</strong>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600;">{{ c.student_name }}</div>
+                            <span style="font-size: 12px; color: var(--text-muted); font-family: monospace;">{{ c.student_id }}</span>
+                        </td>
+                        <td>{{ c.course_name }}</td>
+                        <td><span class="type-tag">{{ c.incident_type }}</span></td>
+                        <td>{{ c.date_reported[:10] }}</td>
+                        <td>{{ c.reporter_name }}</td>
+                        <td>
+                            {% if c.investigator_name %}
+                                {{ c.investigator_name }}
+                            {% else %}
+                                <span style="color: var(--text-muted); font-style: italic;">Unassigned</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <span class="status-pill status-{{ c.status.lower().replace(' ', '-') }}">
+                                {{ c.status }}
+                            </span>
+                        </td>
+                        <td style="text-align: right;">
+                            <a href="{{ url_for('case_detail', case_id=c.id) }}" class="btn btn-sm btn-primary">
+                                View
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="padding: 50px 20px; text-align: center; color: var(--text-muted);">
+            <div style="font-size: 36px; margin-bottom: 12px;">📂</div>
+            <h3 style="font-size: 16px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px;">No cases match your filter criteria</h3>
+            <p style="font-size: 13px;">Try clearing search terms or changing your status selection.</p>
+            <div style="margin-top: 16px;">
+                <a href="{{ url_for('cases_list') }}" class="btn btn-secondary btn-sm">Clear Filters</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
