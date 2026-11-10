@@ -871,14 +871,20 @@ def inject_global_data():
 
 
 # ---------------------------------------------------------------------------
+
+# ---------------------------------------------------------------------------
 # Application Initialization & Entry Point
 # ---------------------------------------------------------------------------
+
+# Initialize database whenever the application starts.
+# Required for Render/Gunicorn deployment.
+init_db()
+seed_data()
+
+print("=" * 60)
+print(" Academic Integrity Case Tracker - Server Started")
+print(" Database initialized successfully")
+print("=" * 60)
+
 if __name__ == "__main__":
-    init_db()
-    seed_data()
-    print("=" * 60)
-    print(" Academic Integrity Case Tracker - Server Started")
-    print(" Access at: http://127.0.0.1:5000")
-    print(" Pure HTML + CSS + Python Flask (No JavaScript)")
-    print("=" * 60)
     app.run(debug=True, port=5000)
