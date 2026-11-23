@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Academic Integrity Case Tracker</title>
+    <!-- CSS Connection with root and static fallback -->
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="static/style.css">
+</head>
+<body class="login-page-body">
+
+    <!-- ================================================================= -->
+    <!-- 1. STANDALONE LOGIN VIEW                                          -->
+    <!-- ================================================================= -->
+    <div id="login-view-container" class="login-card-container">
+        <!-- Login Form Panel -->
+        <div class="login-panel-form">
+            <div class="login-header">
+                <h1>🏛️ Academic Integrity Case Tracker</h1>
+                <p>Sign in to your college staff account</p>
+            </div>
+
+            <!-- Flash Alert Container -->
+            <div id="login-alert-container" class="flash-container"></div>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="username" class="form-label">Username <span class="required">*</span></label>
+                    <input type="text" id="username" name="username" class="form-control" placeholder="Enter username" required autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="password" class="form-label">Password <span class="required">*</span></label>
+                    <input type="password" id="password" name="password" class="form-control" placeholder="Enter password" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="role" class="form-label">Role Verification <span style="font-size: 11px; font-weight: normal; color: var(--text-muted); margin-left: 6px;">Optional</span></label>
+                    <select id="role" name="role" class="form-control">
+                        <option value="">Auto-detect role</option>
+                        <option value="Administrator">Administrator</option>
+                        <option value="Integrity Officer">Integrity Officer</option>
+                        <option value="Investigator">Investigator</option>
+                        <option value="Faculty/Reporter">Faculty/Reporter</option>
+                    </select>
+                    <span class="form-hint">Backend verifies credentials and routes you to your role portal.</span>
+                </div>
+
+                <div style="margin-top: 24px;">
+                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 15px;">
+                        Sign In to Portal &rarr;
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Demo Accounts Panel -->
+        <div class="login-panel-demo">
+            <h2 class="demo-title">Demo User Credentials</h2>
+            <p class="demo-desc">Click any demo account card to automatically populate credentials:</p>
+
+            <div class="demo-account-list">
+                <div class="demo-account-item" data-user="admin" data-pass="admin123" data-role="Administrator">
+                    <div class="demo-role-name">
+                        <span>Administrator</span>
+                        <span class="current-role-badge role-badge-admin">Admin</span>
+                    </div>
+                    <div><strong>User:</strong> <span class="demo-cred">admin</span></div>
+                    <div><strong>Password:</strong> <span class="demo-cred">admin123</span></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Directs to User Management & Audit Trail</div>
+                </div>
+
+                <div class="demo-account-item" data-user="officer" data-pass="officer123" data-role="Integrity Officer">
+                    <div class="demo-role-name">
+                        <span>Integrity Officer</span>
+                        <span class="current-role-badge role-badge-officer">Officer</span>
+                    </div>
+                    <div><strong>User:</strong> <span class="demo-cred">officer</span></div>
+                    <div><strong>Password:</strong> <span class="demo-cred">officer123</span></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Directs to Case Registry for Triage & Assignment</div>
+                </div>
+
+                <div class="demo-account-item" data-user="investigator" data-pass="invest123" data-role="Investigator">
+                    <div class="demo-role-name">
+                        <span>Investigator</span>
+                        <span class="current-role-badge role-badge-investigator">Investigator</span>
+                    </div>
+                    <div><strong>User:</strong> <span class="demo-cred">investigator</span></div>
+                    <div><strong>Password:</strong> <span class="demo-cred">invest123</span></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Directs to Assigned Active Investigations</div>
+                </div>
+
+                <div class="demo-account-item" data-user="faculty" data-pass="faculty123" data-role="Faculty/Reporter">
+                    <div class="demo-role-name">
+                        <span>Faculty/Reporter</span>
+                        <span class="current-role-badge role-badge-faculty">Faculty</span>
+                    </div>
+                    <div><strong>User:</strong> <span class="demo-cred">faculty</span></div>
+                    <div><strong>Password:</strong> <span class="demo-cred">faculty123</span></div>
+                    <div style="font-size: 11px; color: var(--text-muted); margin-top: 4px;">Directs to Report Submissions & Monitoring</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- ================================================================= -->
+    <!-- 2. AUTHENTICATED PORTAL WORKSPACE                                 -->
+    <!-- ================================================================= -->
+    <div id="app-workspace" class="app-layout" style="display: none;">
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="brand-title">
+                    <span>🏛️ CaseTracker</span>
+                </div>
+                <span class="brand-badge">Academic Integrity</span>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section-title">Navigation</div>
+                <a href="#dashboard" class="nav-link active" data-view="dashboard">
+                    <span>📊</span> Dashboard
+                </a>
+                <a href="#cases" class="nav-link" data-view="cases">
+                    <span>📁</span> Case Records
+                </a>
+                <a href="#new-case" class="nav-link nav-faculty-only" data-view="new-case">
+                    <span>✍️</span> Report Incident
+                </a>
+
+                <div class="nav-section-title nav-admin-section">Administration</div>
+                <a href="#audit-logs" class="nav-link nav-officer-admin" data-view="audit-logs">
+                    <span>📜</span> Audit Trail
+                </a>
+                <a href="#users" class="nav-link nav-admin-only" data-view="users">
+                    <span>👥</span> User Accounts
+                </a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-profile">
+                    <div class="user-info-text">
+                        <div id="sidebar-user-name" class="user-name">User</div>
+                        <span id="sidebar-user-role" class="user-role-tag">Role</span>
+                    </div>
+                    <button id="btn-logout" class="btn-logout" title="Sign out" style="background: none; border: none; cursor: pointer;">Logout</button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Column -->
+        <div class="main-wrapper">
+            <header class="top-header">
+                <div class="header-title-wrapper">
+                    <h1 id="page-main-heading" class="page-main-heading">Operational Dashboard</h1>
+                </div>
+
+                <div class="header-meta">
+                    <span id="header-role-badge" class="current-role-badge role-badge-admin">Admin</span>
+                    <span id="header-username" style="font-size: 13px; color: var(--text-muted);">username</span>
+                </div>
+            </header>
+
+            <main class="page-content">
+                <!-- System Flash Alert Banner -->
+                <div id="system-alert-container" class="flash-container"></div>
+
+                <!-- ----------------------------------------------------- -->
+                <!-- SUB-VIEW: DASHBOARD                                   -->
+                <!-- ----------------------------------------------------- -->
+                <div id="view-dashboard" class="subview-section">
+                    <!-- Welcome Hero Banner -->
+                    <div class="card" style="margin-bottom: 24px; background: linear-gradient(to right, #102a43, #1e3a5f); color: #ffffff;">
+                        <div class="card-body" style="padding: 24px 28px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 16px;">
+                                <div>
+                                    <h2 id="dashboard-welcome-heading" style="font-size: 20px; font-weight: 700; margin-bottom: 6px; color: #ffffff;">
+                                        Welcome back!
+                                    </h2>
+                                    <p id="dashboard-role-description" style="font-size: 14px; opacity: 0.85; margin: 0; color: #cbd5e1;">
+                                        Manage and track academic integrity cases across the institution.
+                                    </p>
+                                </div>
+                                <div style="display: flex; gap: 10px;">
+                                    <button class="btn btn-accent btn-nav-action" data-target="new-case" style="box-shadow: 0 2px 4px rgba(0,0,0,0.2);">
+                                        + Report Incident
+                                    </button>
+                                    <button class="btn btn-secondary btn-nav-action" data-target="cases">
+                                        View All Cases
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stat Metric Cards -->
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-label">Total Cases</div>
+                            <div id="stat-total" class="metric-value">5</div>
+                            <div class="metric-sub">Recorded in Institutional Registry</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Open / Under Review</div>
+                            <div id="stat-open" class="metric-value" style="color: var(--warning);">2</div>
+                            <div class="metric-sub">Awaiting Investigation</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Active Investigations</div>
+                            <div id="stat-active" class="metric-value" style="color: var(--accent-blue);">1</div>
+                            <div class="metric-sub">Assigned to Investigators</div>
+                        </div>
+
+                        <div class="metric-card">
+                            <div class="metric-label">Resolved / Closed</div>
+                            <div id="stat-resolved" class="metric-value" style="color: var(--success);">1</div>
+                            <div class="metric-sub">Final Decision Rendered</div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Cases Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Recent Cases</span>
+                            <button class="btn btn-sm btn-secondary btn-nav-action" data-target="cases">View Case Registry &rarr;</button>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Case #</th>
+                                            <th>Student</th>
+                                            <th>Course</th>
+                                            <th>Incident</th>
+                                            <th>Date</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dashboard-recent-tbody">
+                                        <!-- Populated via script.js -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ----------------------------------------------------- -->
+                <!-- SUB-VIEW: CASE REGISTRY                               -->
+                <!-- ----------------------------------------------------- -->
+                <div id="view-cases" class="subview-section" style="display: none;">
+                    <!-- Filter and Search Bar -->
+                    <div class="card" style="margin-bottom: 20px;">
+                        <div class="card-body" style="padding: 16px;">
+                            <div class="filter-form">
+                                <div class="search-input-wrapper">
+                                    <input type="text" id="case-search-input" class="form-control" placeholder="Search case #, student name, course, or incident...">
+                                </div>
+                                <div style="min-width: 180px;">
+                                    <select id="case-status-filter" class="form-control">
+                                        <option value="All">All Statuses</option>
+                                        <option value="Reported">Reported</option>
+                                        <option value="Under Review">Under Review</option>
+                                        <option value="Investigation">Investigation</option>
+                                        <option value="Decision Pending">Decision Pending</option>
+                                        <option value="Resolved">Resolved</option>
+                                        <option value="Closed">Closed</option>
+                                    </select>
+                                </div>
+                                <button id="btn-reset-filter" class="btn btn-secondary">Reset</button>
+                                <button class="btn btn-accent btn-nav-action" data-target="new-case">+ New Report</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cases Table Card -->
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Case Registry</span>
+                            <span id="case-count-badge" style="font-size: 13px; color: var(--text-muted);">5 Total Cases</span>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Case #</th>
+                                            <th>Student</th>
+                                            <th>Course</th>
+                                            <th>Incident Type</th>
+                                            <th>Date Reported</th>
+                                            <th>Investigator</th>
+                                            <th>Status</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cases-registry-tbody">
+                                        <!-- Populated via script.js -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ----------------------------------------------------- -->
+                <!-- SUB-VIEW: CASE DETAIL                                 -->
+                <!-- ----------------------------------------------------- -->
+                <div id="view-case-detail" class="subview-section" style="display: none;">
+                    <div style="margin-bottom: 20px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+                        <button class="btn btn-secondary btn-sm btn-nav-action" data-target="cases">&larr; Back to Case Registry</button>
+                        <div style="display: flex; gap: 8px; align-items: center;">
+                            <span style="font-size: 13px; color: var(--text-muted);">Current Status:</span>
+                            <span id="detail-status-pill" class="status-pill status-investigation" style="font-size: 13px; padding: 6px 14px;">
+                                Investigation
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Workflow Progress Stepper (Pure CSS) -->
+                    <div id="workflow-stepper-container" class="workflow-progress">
+                        <!-- Populated dynamically via script.js -->
+                    </div>
+
+                    <!-- Main Grid Layout -->
+                    <div class="case-detail-grid">
+                        <!-- Left Column: Primary Details & Notes -->
+                        <div>
+                            <!-- Incident Information Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Incident Information</span>
+                                    <span id="detail-incident-type-tag" class="type-tag">Plagiarism</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="form-row">
+                                        <div>
+                                            <div class="info-label">Case Identifier</div>
+                                            <div id="detail-case-number" class="info-value" style="font-weight: 700; color: var(--primary-navy);">AIC-2026-001</div>
+                                        </div>
+                                        <div>
+                                            <div class="info-label">Student ID & Name</div>
+                                            <div class="info-value">
+                                                <strong id="detail-student-name">Samir Patel</strong> 
+                                                <span id="detail-student-id" style="color: var(--text-muted); font-size: 13px;">&bull; ID: STU-1042</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div>
+                                            <div class="info-label">Course Name</div>
+                                            <div id="detail-course-name" class="info-value">CS201 Data Structures</div>
+                                        </div>
+                                        <div>
+                                            <div class="info-label">Date of Incident</div>
+                                            <div id="detail-incident-date" class="info-value">2026-10-10</div>
+                                        </div>
+                                    </div>
+
+                                    <div class="form-row">
+                                        <div>
+                                            <div class="info-label">Date Reported</div>
+                                            <div id="detail-date-reported" class="info-value">2026-10-11 09:30:00</div>
+                                        </div>
+                                        <div>
+                                            <div class="info-label">Reported By</div>
+                                            <div id="detail-reported-by" class="info-value">Prof. Diana Chen (Faculty)</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Narrative Description Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Incident Description</span>
+                                </div>
+                                <div class="card-body">
+                                    <p id="detail-description" class="narrative-box">
+                                        Submitted programming assignment 3 code with identical unique variable names and structure matching an external repository.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Investigation Notes Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Investigation Notes & Findings</span>
+                                </div>
+                                <div class="card-body">
+                                    <p id="detail-investigation-notes" class="narrative-box">
+                                        Interviewed student on 2026-10-15. Reviewing Git commit history and version timestamps.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Final Resolution Card -->
+                            <div id="detail-resolution-card" class="card" style="display: none;">
+                                <div class="card-header" style="background: #f0fdf4;">
+                                    <span class="card-title" style="color: var(--success);">Final Institutional Resolution</span>
+                                </div>
+                                <div class="card-body">
+                                    <p id="detail-resolution" class="narrative-box" style="border-left-color: var(--success);"></p>
+                                </div>
+                            </div>
+
+                            <!-- Case Timeline & Audit History Card -->
+                            <div class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Case Activity Timeline</span>
+                                </div>
+                                <div class="card-body" style="padding: 0;">
+                                    <div class="table-responsive">
+                                        <table class="data-table">
+                                            <thead>
+                                                <tr>
+                                                    <th>Action</th>
+                                                    <th>User</th>
+                                                    <th>Details</th>
+                                                    <th>Timestamp</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="detail-timeline-tbody">
+                                                <!-- Populated via script.js -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Right Column: Administrative Controls -->
+                        <div>
+                            <!-- Investigator Assignment Card (Officer & Admin) -->
+                            <div id="card-assign-investigator" class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Assigned Investigator</span>
+                                </div>
+                                <div class="card-body">
+                                    <div style="margin-bottom: 16px;">
+                                        <div id="detail-inv-name" style="font-size: 16px; font-weight: 700; color: var(--primary-navy);">Dr. Carlos Ruiz</div>
+                                        <div id="detail-inv-email" style="font-size: 13px; color: var(--text-muted);">ruiz@college.edu</div>
+                                    </div>
+
+                                    <form id="form-assign-investigator">
+                                        <div class="form-group">
+                                            <label for="assign-inv-select" class="form-label">Assign / Re-assign Investigator</label>
+                                            <select id="assign-inv-select" class="form-control">
+                                                <option value="">-- Select Investigator --</option>
+                                                <option value="Dr. Carlos Ruiz">Dr. Carlos Ruiz (ruiz@college.edu)</option>
+                                                <option value="Dr. Elena Ramos">Dr. Elena Ramos (ramos@college.edu)</option>
+                                            </select>
+                                        </div>
+                                        <button type="submit" class="btn btn-secondary btn-sm" style="width: 100%;">
+                                            Update Assignment
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Workflow Status Transition Card -->
+                            <div id="card-status-workflow" class="card">
+                                <div class="card-header">
+                                    <span class="card-title">Advance Case Status</span>
+                                </div>
+                                <div class="card-body">
+                                    <form id="form-update-status">
+                                        <div class="form-group">
+                                            <label for="update-status-select" class="form-label">New Status</label>
+                                            <select id="update-status-select" class="form-control" required>
+                                                <option value="Reported">1. Reported</option>
+                                                <option value="Under Review">2. Under Review</option>
+                                                <option value="Investigation">3. Investigation</option>
+                                                <option value="Decision Pending">4. Decision Pending</option>
+                                                <option value="Resolved">5. Resolved</option>
+                                                <option value="Closed">6. Closed</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label for="update-status-notes" class="form-label">Status Change Note</label>
+                                            <textarea id="update-status-notes" class="form-control" rows="3" placeholder="Enter findings, hearing results, or transition rationale..."></textarea>
+                                        </div>
+
+                                        <div id="group-resolution-input" class="form-group" style="display: none;">
+                                            <label for="update-resolution-text" class="form-label">Official Resolution Order <span class="required">*</span></label>
+                                            <textarea id="update-resolution-text" class="form-control" rows="3" placeholder="Record formal sanctions, grade penalties, or disciplinary orders..."></textarea>
+                                        </div>
+
+                                        <button type="submit" class="btn btn-primary btn-sm" style="width: 100%; padding: 10px;">
+                                            Update Status &amp; Log Activity
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ----------------------------------------------------- -->
+                <!-- SUB-VIEW: REPORT INCIDENT                             -->
+                <!-- ----------------------------------------------------- -->
+                <div id="view-new-case" class="subview-section" style="display: none;">
+                    <div style="margin-bottom: 20px;">
+                        <button class="btn btn-secondary btn-sm btn-nav-action" data-target="cases">&larr; Back to Case Registry</button>
+                    </div>
+
+                    <div class="card" style="max-width: 800px; margin: 0 auto;">
+                        <div class="card-header">
+                            <span class="card-title">Report Academic Integrity Incident</span>
+                        </div>
+                        <div class="card-body">
+                            <p style="font-size: 13px; color: var(--text-secondary); margin-bottom: 24px; padding-bottom: 12px; border-bottom: 1px solid var(--border-color);">
+                                Submit an academic misconduct report. All submissions are automatically assigned an institutional Case ID and logged in the immutable audit trail.
+                            </p>
+
+                            <form id="form-new-case">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="new-student-id" class="form-label">Student ID <span class="required">*</span></label>
+                                        <input type="text" id="new-student-id" class="form-control" placeholder="e.g. STU-8821" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new-student-name" class="form-label">Student Full Name <span class="required">*</span></label>
+                                        <input type="text" id="new-student-name" class="form-control" placeholder="e.g. Taylor Smith" required>
+                                    </div>
+                                </div>
+
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="new-course-name" class="form-label">Course Code &amp; Title <span class="required">*</span></label>
+                                        <input type="text" id="new-course-name" class="form-control" placeholder="e.g. CS201 Data Structures" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="new-incident-type" class="form-label">Incident Category <span class="required">*</span></label>
+                                        <select id="new-incident-type" class="form-control" required>
+                                            <option value="">-- Select Category --</option>
+                                            <option value="Plagiarism">Plagiarism</option>
+                                            <option value="Exam Cheating">Exam Cheating</option>
+                                            <option value="Contract Cheating">Contract Cheating</option>
+                                            <option value="Unauthorized Collaboration">Unauthorized Collaboration</option>
+                                            <option value="Data Fabrication">Data Fabrication</option>
+                                            <option value="Other Misconduct">Other Misconduct</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="new-incident-date" class="form-label">Date of Incident</label>
+                                    <input type="date" id="new-incident-date" class="form-control">
+                                </div>
+
+                                <div class="form-group">
+                                    <label for="new-description" class="form-label">Detailed Incident Narrative <span class="required">*</span></label>
+                                    <textarea id="new-description" class="form-control" rows="5" placeholder="Describe the factual circumstances, observed behavior, and evidence discovered..." required></textarea>
+                                </div>
+
+                                <div style="display: flex; gap: 12px; justify-content: flex-end; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border-color);">
+                                    <button type="button" class="btn btn-secondary btn-nav-action" data-target="cases">Cancel</button>
+                                    <button type="submit" class="btn btn-primary" style="padding: 10px 24px;">Submit Incident Report</button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ----------------------------------------------------- -->
+                <!-- SUB-VIEW: USER MANAGEMENT (ADMIN ONLY)                -->
+                <!-- ----------------------------------------------------- -->
+                <div id="view-users" class="subview-section" style="display: none;">
+                    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 24px;">
+                        <!-- Users Table Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">User Account Registry</span>
+                                <span id="users-count-badge" style="font-size: 13px; color: var(--text-muted);">&bull; 5 Total Users</span>
+                            </div>
+                            <div class="card-body" style="padding: 0;">
+                                <div class="table-responsive">
+                                    <table class="data-table">
+                                        <thead>
+                                            <tr>
+                                                <th>User</th>
+                                                <th>Role</th>
+                                                <th>Email</th>
+                                                <th>Created</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="users-table-tbody">
+                                            <!-- Populated via script.js -->
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Add User Form Card -->
+                        <div class="card">
+                            <div class="card-header">
+                                <span class="card-title">Create User Account</span>
+                            </div>
+                            <div class="card-body">
+                                <form id="form-add-user">
+                                    <div class="form-group">
+                                        <label for="add-user-fullname" class="form-label">Full Name <span class="required">*</span></label>
+                                        <input type="text" id="add-user-fullname" class="form-control" placeholder="e.g. Dr. Jane Doe" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="add-user-username" class="form-label">Username <span class="required">*</span></label>
+                                        <input type="text" id="add-user-username" class="form-control" placeholder="e.g. jdoe" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="add-user-role" class="form-label">Institutional Role <span class="required">*</span></label>
+                                        <select id="add-user-role" class="form-control" required>
+                                            <option value="Administrator">Administrator</option>
+                                            <option value="Integrity Officer">Integrity Officer</option>
+                                            <option value="Investigator">Investigator</option>
+                                            <option value="Faculty/Reporter" selected>Faculty/Reporter</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="add-user-email" class="form-label">College Email <span class="required">*</span></label>
+                                        <input type="email" id="add-user-email" class="form-control" placeholder="e.g. jdoe@college.edu" required>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="add-user-password" class="form-label">Initial Password <span class="required">*</span></label>
+                                        <input type="password" id="add-user-password" class="form-control" placeholder="Set temporary password" required>
+                                    </div>
+                                    <button type="submit" class="btn btn-primary" style="width: 100%; padding: 10px; margin-top: 8px;">
+                                        Create Account
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ----------------------------------------------------- -->
+                <!-- SUB-VIEW: AUDIT TRAIL LOGS                            -->
+                <!-- ----------------------------------------------------- -->
+                <div id="view-audit-logs" class="subview-section" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <span class="card-title">Institutional Activity &amp; Audit Trail</span>
+                            <span style="font-size: 13px; color: var(--text-muted);">&bull; Immutable Event Ledger</span>
+                        </div>
+                        <div class="card-body" style="padding: 0;">
+                            <div class="table-responsive">
+                                <table class="data-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Event / Action</th>
+                                            <th>Associated Case</th>
+                                            <th>Performed By</th>
+                                            <th>Details</th>
+                                            <th>Timestamp</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="audit-table-tbody">
+                                        <!-- Populated via script.js -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+
+            <footer class="app-footer">
+                Academic Integrity Case Tracker &copy; 2026 &mdash; College Academic Management System
+            </footer>
+        </div>
+    </div>
+
+    <!-- Client Scripts (Connected via root and static) -->
+    <script src="script.js" defer></script>
+    <script src="static/script.js" defer></script>
+</body>
+</html>
